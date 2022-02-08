@@ -50,3 +50,29 @@ for function_name, function, test_vals in functions:
             print("{:.4g}".format(function(value)))
         except ValueError as e:
             print(str(e))
+
+functions_var_args = [
+    (
+        "gcd",
+        gcd,
+        (
+            (1, 4),
+            (2, 8),
+            (0, 8),
+            (-1, 19),
+            (-5, 42),
+            (-7, -7),
+            (-9, -2),
+            (0, 0),
+            (6, 30, 40, -60, 20, 40),
+        ),
+    ),
+]
+
+for function_name, function, test_vals in functions_var_args:
+    print(function_name)
+    for values in test_vals:
+        try:
+            print("{:.4g}".format(function(*values)))
+        except ValueError as e:
+            print(str(e))

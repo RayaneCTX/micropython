@@ -199,7 +199,52 @@ MATH_FUN_1(erfc, erfc)
 MATH_FUN_1(gamma, tgamma)
 // lgamma(x): return the natural logarithm of the gamma function of x
 MATH_FUN_1(lgamma, lgamma)
-#endif
+
+// gcd(x, y): return the greatest common divisor
+STATIC mp_int_t gcd_func(mp_int_t x, mp_int_t y) {
+    if (x == 0) {
+        return y;
+    }
+    if (y == 0) {
+        return x;
+    }
+    if (x == y) {
+        return x;
+    }
+    if (x > y) {
+        return gcd_func(x - y, y);
+    }
+    return gcd_func(x, y - x);
+}
+STATIC mp_obj_t mp_math_gcd(size_t n_args, const mp_obj_t *args) {
+    mp_int_t e = mp_obj_get_int(args[--n_args]);
+    mp_int_t d = mp_obj_get_int(args[--n_args]);
+    // calc absolute value manually, makes it unnecessary to include stdlib
+    if (d < 0) {
+        d *= -1;
+    }
+    if (e < 0) {
+        e *= -1;
+    }
+
+    mp_int_t ans = gcd_func(d, e);
+    if (n_args == 0) {
+        return mp_obj_new_int(ans);
+    }
+
+    // gcd(a, gcd(b, gcd(c, gcd(d, e)))))
+    do {
+        mp_int_t next_variable = mp_obj_get_int(args[--n_args]);
+        if (next_variable < 0) {
+            next_variable *= -1;
+        }
+        ans = gcd_func(next_variable, ans);
+    } while (n_args > 0);
+    return mp_obj_new_int(ans);
+}
+MP_DEFINE_CONST_FUN_OBJ_VAR(mp_math_gcd_obj, 2, mp_math_gcd);
+
+#endif // MICROPY_PY_MATH_SPECIAL_FUNCTIONS
 // TODO: fsum
 
 #if MICROPY_PY_MATH_ISCLOSE
@@ -425,6 +470,7 @@ STATIC const mp_rom_map_elem_t mp_module_math_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_erfc), MP_ROM_PTR(&mp_math_erfc_obj) },
     { MP_ROM_QSTR(MP_QSTR_gamma), MP_ROM_PTR(&mp_math_gamma_obj) },
     { MP_ROM_QSTR(MP_QSTR_lgamma), MP_ROM_PTR(&mp_math_lgamma_obj) },
+    { MP_ROM_QSTR(MP_QSTR_gcd), MP_ROM_PTR(&mp_math_gcd_obj) },
     #endif
 };
 
