@@ -175,7 +175,7 @@ STATIC void dict_union_helper(mp_obj_dict_t *self, mp_obj_t other) {
     mp_map_elem_t *iter;
 
     while((iter = dict_iter_next(MP_OBJ_TO_PTR(other), &current_key)) != NULL) {
-        mp_map_lookup(&self->map, iter, MP_MAP_LOOKUP_ADD_IF_NOT_FOUND);
+        mp_map_lookup(&self->map, iter->key, MP_MAP_LOOKUP_ADD_IF_NOT_FOUND)->value = iter->value;
     }
 }
 
@@ -187,11 +187,7 @@ STATIC mp_obj_t dict_union(mp_obj_t lhs, mp_obj_t rhs) {
 
     DPRINTF("begin.\n");
 
-    // 1. Assert that the inputs are valid (example in dict_getiter below).
-    // 2. Create a copy of the left-hand side.
-    // 3. Copy over elements from the right-hand side not found in left-hand
-    // side.
-   
+    mp_check_self(mp_obj_is_dict_or_ordereddict(self_in));
     mp_obj_t merged_dict = mp_obj_dict_copy(lhs);
     dict_union_helper(MP_OBJ_TO_PTR(merged_dict), rhs);
 
