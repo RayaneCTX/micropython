@@ -33,11 +33,12 @@
 #include "py/objtype.h"
 #include "py/objstr.h"
 
-// Include DPRINTF macro
-#include "ports/unix/mydbg.h"
-
-// Enable debugging only with the right define
-#ifndef DICT_DEBUG
+/*
+ * Enable the debugging DPRINTF statements. The DEBUG_DICT macro must be
+ * defined.
+ */
+#include "utils/debug.h"
+#ifndef DEBUG_DICT
 #undef DPRINTF
 #define DPRINTF(...) (void) 0
 #endif
@@ -118,7 +119,7 @@ STATIC void dict_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_
 
 mp_obj_t mp_obj_dict_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
 
-    DPRINTF("mp_obj_dict_make_new(): begin.\n");
+    DPRINTF("begin.\n");
 
     mp_obj_t dict_out = mp_obj_new_dict(0);
     mp_obj_dict_t *dict = MP_OBJ_TO_PTR(dict_out);
@@ -139,7 +140,7 @@ mp_obj_t mp_obj_dict_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
 
 STATIC mp_obj_t dict_unary_op(mp_unary_op_t op, mp_obj_t self_in) {
 
-    DPRINTF("dict_unary_op(): begin.\n");
+    DPRINTF("begin.\n");
 
     mp_obj_dict_t *self = MP_OBJ_TO_PTR(self_in);
     switch (op) {
@@ -164,11 +165,17 @@ STATIC mp_obj_t dict_unary_op(mp_unary_op_t op, mp_obj_t self_in) {
  */
 STATIC void dict_union_helper(mp_obj_dict_t *self, mp_obj_t other) {
    
-    mp_obj_t iter = mp_getiter(other, NULL);
-    mp_obj_t next;
+    /*
+     * Status: makes sense to use dict_iter_next here. However, mp_map_lookup wants
+     * iter to be mp_obj_t, not mp_map_elem_t. Need to find out how to bridge that
+     * gap. Also, need to figure out how to write values.
+     */
 
-    while((next = mp_iternext(iter)) != MP_OBJ_STOP_ITERATION) {
-        mp_map_lookup(&self->map, next, MP_MAP_LOOKUP_ADD_IF_NOT_FOUND)->value = 0;
+    size_t current_key = 0;
+    mp_map_elem_t *iter;
+
+    while((iter = dict_iter_next(MP_OBJ_TO_PTR(other), &current_key)) != NULL) {
+        mp_map_lookup(&self->map, iter, MP_MAP_LOOKUP_ADD_IF_NOT_FOUND);
     }
 }
 
@@ -178,13 +185,13 @@ STATIC void dict_union_helper(mp_obj_dict_t *self, mp_obj_t other) {
  */
 STATIC mp_obj_t dict_union(mp_obj_t lhs, mp_obj_t rhs) {
 
-    DPRINTF("dict_union(): begin.\n");
+    DPRINTF("begin.\n");
 
-    // 1. Assert that the inputs are valid (how though?).
+    // 1. Assert that the inputs are valid (example in dict_getiter below).
     // 2. Create a copy of the left-hand side.
     // 3. Copy over elements from the right-hand side not found in left-hand
     // side.
-    
+   
     mp_obj_t merged_dict = mp_obj_dict_copy(lhs);
     dict_union_helper(MP_OBJ_TO_PTR(merged_dict), rhs);
 
@@ -193,7 +200,7 @@ STATIC mp_obj_t dict_union(mp_obj_t lhs, mp_obj_t rhs) {
 
 STATIC mp_obj_t dict_binary_op(mp_binary_op_t op, mp_obj_t lhs_in, mp_obj_t rhs_in) {
 
-    DPRINTF("dict_binary_op(): begin.\n");
+    DPRINTF("begin.\n");
 
     mp_obj_dict_t *o = MP_OBJ_TO_PTR(lhs_in);
     switch (op) {
@@ -240,7 +247,7 @@ STATIC mp_obj_t dict_binary_op(mp_binary_op_t op, mp_obj_t lhs_in, mp_obj_t rhs_
 
         case MP_BINARY_OP_OR: {
             
-            DPRINTF("dict_binary_op(): operation is MP_BINARY_OP_OR.\n");
+            DPRINTF("operation is MP_BINARY_OP_OR.\n");
 
             return dict_union(lhs_in, rhs_in);
         }
@@ -254,7 +261,7 @@ STATIC mp_obj_t dict_binary_op(mp_binary_op_t op, mp_obj_t lhs_in, mp_obj_t rhs_
 // Note: Make sure this is inlined in load part of dict_subscr() below.
 mp_obj_t mp_obj_dict_get(mp_obj_t self_in, mp_obj_t index) {
 
-    DPRINTF("mp_obj_dict_get(): begin.\n");
+    DPRINTF("begin.\n");
 
     mp_obj_dict_t *self = MP_OBJ_TO_PTR(self_in);
     mp_map_elem_t *elem = mp_map_lookup(&self->map, index, MP_MAP_LOOKUP);
@@ -267,7 +274,7 @@ mp_obj_t mp_obj_dict_get(mp_obj_t self_in, mp_obj_t index) {
 
 STATIC mp_obj_t dict_subscr(mp_obj_t self_in, mp_obj_t index, mp_obj_t value) {
 
-    DPRINTF("dict_subscr(): begin.\n");
+    DPRINTF("begin.\n");
 
     if (value == MP_OBJ_NULL) {
         // delete
@@ -300,7 +307,7 @@ STATIC void mp_ensure_not_fixed(const mp_obj_dict_t *dict) {
 
 STATIC mp_obj_t dict_clear(mp_obj_t self_in) {
 
-    DPRINTF("dict_clear(): begin.\n");
+    DPRINTF("begin.\n");
 
     mp_check_self(mp_obj_is_dict_or_ordereddict(self_in));
     mp_obj_dict_t *self = MP_OBJ_TO_PTR(self_in);
@@ -314,7 +321,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_1(dict_clear_obj, dict_clear);
 
 mp_obj_t mp_obj_dict_copy(mp_obj_t self_in) {
 
-    DPRINTF("mp_obj_dict_copy(): begin.\n");
+    DPRINTF("begin.\n");
 
     mp_check_self(mp_obj_is_dict_or_ordereddict(self_in));
     mp_obj_dict_t *self = MP_OBJ_TO_PTR(self_in);
@@ -334,7 +341,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_1(dict_copy_obj, mp_obj_dict_copy);
 // this is a classmethod
 STATIC mp_obj_t dict_fromkeys(size_t n_args, const mp_obj_t *args) {
 
-    DPRINTF("dict_fromkeys(): begin.\n");
+    DPRINTF("begin.\n");
 
     mp_obj_t iter = mp_getiter(args[1], NULL);
     mp_obj_t value = mp_const_none;
@@ -397,7 +404,7 @@ STATIC mp_obj_t dict_get_helper(size_t n_args, const mp_obj_t *args, mp_map_look
 
 STATIC mp_obj_t dict_get(size_t n_args, const mp_obj_t *args) {
 
-    DPRINTF("dict_get(): begin.\n");
+    DPRINTF("begin.\n");
 
     return dict_get_helper(n_args, args, MP_MAP_LOOKUP);
 }
@@ -405,7 +412,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(dict_get_obj, 2, 3, dict_get);
 
 STATIC mp_obj_t dict_pop(size_t n_args, const mp_obj_t *args) {
 
-    DPRINTF("dict_pop(): begin.\n");
+    DPRINTF("begin.\n");
 
     return dict_get_helper(n_args, args, MP_MAP_LOOKUP_REMOVE_IF_FOUND);
 }
@@ -413,7 +420,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(dict_pop_obj, 2, 3, dict_pop);
 
 STATIC mp_obj_t dict_setdefault(size_t n_args, const mp_obj_t *args) {
 
-    DPRINTF("dict_setdefault(): begin.\n");
+    DPRINTF("begin.\n");
 
     return dict_get_helper(n_args, args, MP_MAP_LOOKUP_ADD_IF_NOT_FOUND);
 }
@@ -421,7 +428,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(dict_setdefault_obj, 2, 3, dict_setde
 
 STATIC mp_obj_t dict_popitem(mp_obj_t self_in) {
 
-    DPRINTF("dict_popitem(): begin.\n");
+    DPRINTF("begin.\n");
 
     mp_check_self(mp_obj_is_dict_or_ordereddict(self_in));
     mp_obj_dict_t *self = MP_OBJ_TO_PTR(self_in);
@@ -449,7 +456,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_1(dict_popitem_obj, dict_popitem);
 
 STATIC mp_obj_t dict_update(size_t n_args, const mp_obj_t *args, mp_map_t *kwargs) {
 
-    DPRINTF("dict_update(): begin.\n");
+    DPRINTF("begin.\n");
 
     mp_check_self(mp_obj_is_dict_or_ordereddict(args[0]));
     mp_obj_dict_t *self = MP_OBJ_TO_PTR(args[0]);
@@ -704,7 +711,7 @@ const mp_obj_type_t mp_type_ordereddict = {
 
 void mp_obj_dict_init(mp_obj_dict_t *dict, size_t n_args) {
 
-    DPRINTF("mp_obj_dict_init(): begin.\n");
+    DPRINTF("begin.\n");
 
     dict->base.type = &mp_type_dict;
     mp_map_init(&dict->map, n_args);
@@ -712,7 +719,7 @@ void mp_obj_dict_init(mp_obj_dict_t *dict, size_t n_args) {
 
 mp_obj_t mp_obj_new_dict(size_t n_args) {
 
-    DPRINTF("mp_obj_new_dict(): begin.\n");
+    DPRINTF("begin.\n");
 
     mp_obj_dict_t *o = m_new_obj(mp_obj_dict_t);
     mp_obj_dict_init(o, n_args);
@@ -721,7 +728,7 @@ mp_obj_t mp_obj_new_dict(size_t n_args) {
 
 size_t mp_obj_dict_len(mp_obj_t self_in) {
 
-    DPRINTF("mp_obj_dict_len(): begin.\n");
+    DPRINTF("begin.\n");
 
     mp_obj_dict_t *self = MP_OBJ_TO_PTR(self_in);
     return self->map.used;
@@ -729,7 +736,7 @@ size_t mp_obj_dict_len(mp_obj_t self_in) {
 
 mp_obj_t mp_obj_dict_store(mp_obj_t self_in, mp_obj_t key, mp_obj_t value) {
 
-    DPRINTF("mp_obj_dict_store(): begin.\n");
+    DPRINTF("begin.\n");
 
     mp_check_self(mp_obj_is_dict_or_ordereddict(self_in));
     mp_obj_dict_t *self = MP_OBJ_TO_PTR(self_in);
@@ -740,7 +747,7 @@ mp_obj_t mp_obj_dict_store(mp_obj_t self_in, mp_obj_t key, mp_obj_t value) {
 
 mp_obj_t mp_obj_dict_delete(mp_obj_t self_in, mp_obj_t key) {
 
-    DPRINTF("mp_obj_dict_delete(): begin.\n");
+    DPRINTF("begin.\n");
 
     mp_obj_t args[2] = {self_in, key};
     dict_get_helper(2, args, MP_MAP_LOOKUP_REMOVE_IF_FOUND);
