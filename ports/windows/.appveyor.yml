@@ -4,7 +4,7 @@ skip_tags: true
 
 environment:
   # Python version used
-  MICROPY_CPYTHON3: c:/python38/python.exe
+  MICROPY_CPYTHON3: c:/python39/python.exe
   # The variants.
   matrix:
     - PyVariant: dev
