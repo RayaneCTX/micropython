@@ -202,29 +202,17 @@ MATH_FUN_1(lgamma, lgamma)
 
 // gcd(x, y): return the greatest common divisor
 STATIC mp_int_t gcd_func(mp_int_t x, mp_int_t y) {
-    if (x == 0) {
-        return y;
-    }
-    if (y == 0) {
-        return x;
-    }
-    if (x == y) {
-        return x;
-    }
-    if (x > y) {
-        return gcd_func(x - y, y);
-    }
-    return gcd_func(x, y - x);
+    return (y != 0) ? gcd_func(y, x % y) : x;
 }
 STATIC mp_obj_t mp_math_gcd(size_t n_args, const mp_obj_t *args) {
     mp_int_t e = mp_obj_get_int(args[--n_args]);
     mp_int_t d = mp_obj_get_int(args[--n_args]);
     // calc absolute value manually, makes it unnecessary to include stdlib
     if (d < 0) {
-        d *= -1;
+        d = -d;
     }
     if (e < 0) {
-        e *= -1;
+        e = -e;
     }
 
     mp_int_t ans = gcd_func(d, e);
@@ -236,7 +224,7 @@ STATIC mp_obj_t mp_math_gcd(size_t n_args, const mp_obj_t *args) {
     do {
         mp_int_t next_variable = mp_obj_get_int(args[--n_args]);
         if (next_variable < 0) {
-            next_variable *= -1;
+            next_variable = -next_variable;
         }
         ans = gcd_func(next_variable, ans);
     } while (n_args > 0);
