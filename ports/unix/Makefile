@@ -35,17 +35,28 @@ INC +=  -I.
 INC +=  -I$(TOP)
 INC += -I$(BUILD)
 
+# Debug flags
+DFLAGS = -DDEBUG_DICT
+
 # compiler settings
-CWARN = -Wall -Werror
+CWARN = -Wall #-Werror
 CWARN += -Wextra -Wno-unused-parameter -Wpointer-arith -Wdouble-promotion -Wfloat-conversion
-CFLAGS += $(INC) $(CWARN) -std=gnu99 -DUNIX $(CFLAGS_MOD) $(COPT) -I$(VARIANT_DIR) $(CFLAGS_EXTRA)
+CFLAGS += $(INC) $(CWARN) -std=gnu99 -DUNIX $(DFLAGS) $(CFLAGS_MOD) $(COPT) -I$(VARIANT_DIR) $(CFLAGS_EXTRA)
 
 # Debugging/Optimization
 ifdef DEBUG
-COPT ?= -Og
+COPT ?= -Og -O0
 else
 COPT ?= -Os
 COPT += -DNDEBUG
+endif
+
+ifdef DICT_DEBUG
+COPT += -DDICT_DEBUG
+endif
+
+ifdef PARSE_DEBUG
+COPT += -DPARSE_DEBUG
 endif
 
 # Remove unused sections.
@@ -270,6 +281,12 @@ CFLAGS += -DMPZ_DIG_SIZE=16 # force 16 bits to work on both 32 and 64 bit archs
 CFLAGS += -DMICROPY_MODULE_FROZEN_STR
 endif
 
+HASCPP17 = $(shell expr `$(CC) -dumpversion | cut -f1 -d.` \>= 7)
+ifeq ($(HASCPP17), 1)
+	CXXFLAGS += -std=c++17
+else
+	CXXFLAGS += -std=c++11
+endif
 CXXFLAGS += $(filter-out -Wmissing-prototypes -Wold-style-definition -std=gnu99,$(CFLAGS) $(CXXFLAGS_MOD))
 
 ifeq ($(MICROPY_FORCE_32BIT),1)
