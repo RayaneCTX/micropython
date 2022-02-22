@@ -35,17 +35,15 @@ INC +=  -I.
 INC +=  -I$(TOP)
 INC += -I$(BUILD)
 
-# Debug flags
-DFLAGS = -DDEBUG_DICT
-
 # compiler settings
 CWARN = -Wall #-Werror
 CWARN += -Wextra -Wno-unused-parameter -Wpointer-arith -Wdouble-promotion -Wfloat-conversion
-CFLAGS += $(INC) $(CWARN) -std=gnu99 -DUNIX $(DFLAGS) $(CFLAGS_MOD) $(COPT) -I$(VARIANT_DIR) $(CFLAGS_EXTRA)
+CFLAGS += $(INC) $(CWARN) -std=gnu99 -DUNIX $(CFLAGS_MOD) $(COPT) -I$(VARIANT_DIR) $(CFLAGS_EXTRA)
 
 # Debugging/Optimization
 ifdef DEBUG
 COPT ?= -Og -O0
+CFLAGS += -DDEBUG_DICT
 else
 COPT ?= -Os
 COPT += -DNDEBUG
