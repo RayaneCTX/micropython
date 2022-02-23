@@ -70,12 +70,9 @@ jobs:
       run: tests/run-tests.py --print-failures
 
   coverage:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-21.10
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
-      with:
-        python-version: '3.9'
     - name: Install packages
       run: source tools/ci.sh && ci_unix_coverage_setup
     - name: Build
@@ -100,12 +97,9 @@ jobs:
       run: tests/run-tests.py --print-failures
 
   coverage_32bit:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-21.10
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
-      with:
-        python-version: '3.9'
     - name: Install packages
       run: source tools/ci.sh && ci_unix_32bit_setup
     - name: Build

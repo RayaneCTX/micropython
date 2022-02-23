@@ -437,7 +437,8 @@ function ci_unix_dev_run_tests {
 }
 
 function ci_unix_coverage_setup {
-    sudo apt-get --no-install-recommends install -y python3-setuptools python3-pyelftools
+    sudo pip3 install setuptools
+    sudo pip3 install pyelftools
     gcc --version
     python3 --version
 }
