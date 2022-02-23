@@ -70,7 +70,7 @@ jobs:
       run: tests/run-tests.py --print-failures
 
   coverage:
-    runs-on: ubuntu-21.10
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - name: Install packages
@@ -97,7 +97,7 @@ jobs:
       run: tests/run-tests.py --print-failures
 
   coverage_32bit:
-    runs-on: ubuntu-21.10
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - name: Install packages
