@@ -437,9 +437,9 @@ function ci_unix_dev_run_tests {
 }
 
 function ci_unix_coverage_setup {
-    sudo python -m pip install --upgrade pip
-    sudo pip install setuptools
-    sudo pip install pyelftools
+    sudo python3 -m pip install --upgrade pip
+    sudo pip3 install setuptools
+    sudo pip3 install pyelftools
     gcc --version
     python3 --version
 }
@@ -462,9 +462,9 @@ function ci_unix_32bit_setup {
     sudo dpkg --add-architecture i386
     sudo apt-get update
     sudo apt-get install gcc-multilib g++-multilib libffi-dev:i386
-    sudo python -m pip install --upgrade pip
-    sudo pip install setuptools
-    sudo pip install pyelftools
+    sudo python3 -m pip install --upgrade pip
+    sudo pip3 install setuptools
+    sudo pip3 install pyelftools
     gcc --version
     python2 --version
     python3 --version
