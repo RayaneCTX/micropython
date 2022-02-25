@@ -201,34 +201,73 @@ MATH_FUN_1(gamma, tgamma)
 MATH_FUN_1(lgamma, lgamma)
 
 // gcd(x, y): return the greatest common divisor
-STATIC mp_int_t gcd_func(mp_int_t x, mp_int_t y) {
-    return (y != 0) ? gcd_func(y, x % y) : x;
-}
-STATIC mp_obj_t mp_math_gcd(size_t n_args, const mp_obj_t *args) {
-    mp_int_t e = mp_obj_get_int(args[--n_args]);
-    mp_int_t d = mp_obj_get_int(args[--n_args]);
-    // calc absolute value manually, makes it unnecessary to include stdlib
-    if (d < 0) {
-        d = -d;
+STATIC mp_obj_t gcd_func(mp_obj_t x, mp_obj_t y) {
+    mp_obj_t temp;
+    mp_obj_t zero = mp_obj_new_int(0);
+    if (mp_binary_op(MP_BINARY_OP_MORE, y, x) == mp_const_true) {
+        temp = x;
+        x = y;
+        y = temp;
     }
-    if (e < 0) {
-        e = -e;
+    for (temp = mp_binary_op(MP_BINARY_OP_MODULO, x, y); mp_binary_op(MP_BINARY_OP_MORE, temp, zero) == mp_const_true;) {
+        x = y;
+        y = temp;
+    }
+    return y;
+}
+
+// gcd(x, y): return the greatest common divisor
+//STATIC mp_int_t gcd_func(mp_int_t u, mp_int_t v)
+//{
+//    mp_int_t t;
+//
+//    if (mp_binary_op(MP_BINARY_OP_LESS, u, 0)
+//        u = mp_unary_op(MP_UNARY_OP_NEGATIVE, u)
+//    if (mp_binary_op(MP_BINARY_OP_LESS, v, 0)
+//        v = mp_unary_op(MP_UNARY_OP_NEGATIVE, v)
+//    if (mp_binary_op(MP_BINARY_OP_MORE, v, u)    // make sure that u >= v
+//        t = u;
+//    u = v;
+//    v = t;
+//}
+//while (t = mp_binary_op(MP_BINARY_OP_MODULO, u, v); mp_binary_op(MP_BINARY_OP_MORE, t, 0))
+//u = v;
+//v = t;
+//}
+//
+//return v;
+//}
+
+STATIC mp_obj_t mp_math_gcd(size_t n_args, const mp_obj_t *args) {
+    //cast e,d to void pointer instead of ints
+    mp_obj_t e = args[--n_args];
+    mp_obj_t d = args[--n_args];
+
+    // e,d are of type integer
+
+    mp_obj_t zero = mp_obj_new_int(0);
+    if (mp_binary_op(MP_BINARY_OP_LESS, e, zero) == mp_const_true){
+        e = mp_unary_op(MP_UNARY_OP_NEGATIVE, e);
     }
 
-    mp_int_t ans = gcd_func(d, e);
+    if (mp_binary_op(MP_BINARY_OP_LESS, d, zero) == mp_const_true) {
+        d = mp_unary_op(MP_UNARY_OP_NEGATIVE, d);
+    }
+
+    mp_obj_t ans = gcd_func(d, e);
     if (n_args == 0) {
-        return mp_obj_new_int(ans);
+        return ans;
     }
 
     // gcd(a, gcd(b, gcd(c, gcd(d, e)))))
     do {
-        mp_int_t next_variable = mp_obj_get_int(args[--n_args]);
-        if (next_variable < 0) {
-            next_variable = -next_variable;
+        mp_obj_t next_variable = args[--n_args];
+        if (mp_binary_op(MP_BINARY_OP_LESS, next_variable, zero) == mp_const_true) {
+            next_variable = mp_unary_op(MP_UNARY_OP_NEGATIVE, next_variable);
         }
         ans = gcd_func(next_variable, ans);
     } while (n_args > 0);
-    return mp_obj_new_int(ans);
+    return ans;
 }
 MP_DEFINE_CONST_FUN_OBJ_VAR(mp_math_gcd_obj, 2, mp_math_gcd);
 
