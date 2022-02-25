@@ -437,14 +437,14 @@ function ci_unix_dev_run_tests {
 }
 
 function ci_unix_coverage_setup {
-    sudo apt-get install --no-install-recommends -y software-properties-common
-    sudo add-apt-repository ppa:deadsnakes/ppa
-    sudo apt-get update
-    sudo apt-get install -y python3.9
-    sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
-    sudo apt-get --no-install-recommends install -y python3-setuptools python3-pyelftools
-    sudo pip3 install setuptools
-    sudo pip3 install pyelftools
+#    sudo apt-get install --no-install-recommends -y software-properties-common
+#    sudo add-apt-repository ppa:deadsnakes/ppa
+#    sudo apt-get update
+#    sudo apt-get install -y python3.9
+#    sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
+#    sudo apt-get --no-install-recommends install -y python3-setuptools python3-pyelftools
+#    sudo pip3 install setuptools
+#    sudo pip3 install pyelftools
     gcc --version
     python3 --version
 }
