@@ -436,7 +436,7 @@ function ci_unix_dev_run_tests {
     ci_unix_run_tests_helper VARIANT=dev
 }
 
-function ci_unix_coverage_setup {
+function ci_unix_coverage_print_env {
     gcc --version
     python3 --version
 }
