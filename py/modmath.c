@@ -200,7 +200,16 @@ MATH_FUN_1(gamma, tgamma)
 // lgamma(x): return the natural logarithm of the gamma function of x
 MATH_FUN_1(lgamma, lgamma)
 
-// gcd(x, y): return the greatest common divisor
+/* gcd(x, y): return the greatest common divisor
+ GCD Pseudocode
+  * gcd(x,y)
+  * if x < y;
+  * x, y = y, x
+  *
+  * while y != 0:
+  *  x,y = y, x mod y
+  * return x
+*/
 STATIC mp_obj_t gcd_func(mp_obj_t x, mp_obj_t y) {
 
     mp_obj_t temp;
@@ -220,6 +229,9 @@ STATIC mp_obj_t gcd_func(mp_obj_t x, mp_obj_t y) {
         x = temp;
 //        printf("")
     }
+
+
+
 
 
     return x;
