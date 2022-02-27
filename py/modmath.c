@@ -202,54 +202,40 @@ MATH_FUN_1(lgamma, lgamma)
 
 // gcd(x, y): return the greatest common divisor
 STATIC mp_obj_t gcd_func(mp_obj_t x, mp_obj_t y) {
+
     mp_obj_t temp;
     mp_obj_t zero = mp_obj_new_int(0);
-    if (mp_binary_op(MP_BINARY_OP_MORE, y, x) == mp_const_true) {
+
+    // if x < y: x,y = y, x
+    if (mp_binary_op(MP_BINARY_OP_LESS, x, y) == mp_const_true){
         temp = x;
         x = y;
         y = temp;
-    }
-    for (temp = mp_binary_op(MP_BINARY_OP_MODULO, x, y); mp_binary_op(MP_BINARY_OP_MORE, temp, zero) == mp_const_true;) {
-        x = y;
-        y = temp;
-    }
-    return y;
-}
 
-// gcd(x, y): return the greatest common divisor
-//STATIC mp_int_t gcd_func(mp_int_t u, mp_int_t v)
-//{
-//    mp_int_t t;
-//
-//    if (mp_binary_op(MP_BINARY_OP_LESS, u, 0)
-//        u = mp_unary_op(MP_UNARY_OP_NEGATIVE, u)
-//    if (mp_binary_op(MP_BINARY_OP_LESS, v, 0)
-//        v = mp_unary_op(MP_UNARY_OP_NEGATIVE, v)
-//    if (mp_binary_op(MP_BINARY_OP_MORE, v, u)    // make sure that u >= v
-//        t = u;
-//    u = v;
-//    v = t;
-//}
-//while (t = mp_binary_op(MP_BINARY_OP_MODULO, u, v); mp_binary_op(MP_BINARY_OP_MORE, t, 0))
-//u = v;
-//v = t;
-//}
-//
-//return v;
-//}
+    }
+
+    while(mp_binary_op(MP_BINARY_OP_NOT_EQUAL, y, zero) == mp_const_true) {
+        temp = y;
+        y = mp_binary_op(MP_BINARY_OP_MODULO, x,y);
+        x = temp;
+//        printf("")
+    }
+
+
+    return x;
+}
 
 STATIC mp_obj_t mp_math_gcd(size_t n_args, const mp_obj_t *args) {
     //cast e,d to void pointer instead of ints
     mp_obj_t e = args[--n_args];
     mp_obj_t d = args[--n_args];
-
-    // e,d are of type integer
-
     mp_obj_t zero = mp_obj_new_int(0);
+
+    // if e < 0: e = -e
     if (mp_binary_op(MP_BINARY_OP_LESS, e, zero) == mp_const_true){
         e = mp_unary_op(MP_UNARY_OP_NEGATIVE, e);
     }
-
+    // if d < 0: d = -d
     if (mp_binary_op(MP_BINARY_OP_LESS, d, zero) == mp_const_true) {
         d = mp_unary_op(MP_UNARY_OP_NEGATIVE, d);
     }
