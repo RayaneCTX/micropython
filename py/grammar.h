@@ -71,7 +71,8 @@ DEF_RULE_NC(async_funcdef, and(2), tok(KW_ASYNC), rule(funcdef))
 #else
 DEF_RULE_NC(decorated_body, or(2), rule(classdef), rule(funcdef))
 #endif
-DEF_RULE(funcdef, c(funcdef), and_blank(8), tok(KW_DEF), tok(NAME), tok(DEL_PAREN_OPEN), opt_rule(typedargslist), tok(DEL_PAREN_CLOSE), opt_rule(funcdefrettype), tok(DEL_COLON), rule(suite))
+DEF_RULE(funcdef, c(funcdef), and_blank(9), tok(KW_DEF), tok(NAME), tok(DEL_PAREN_OPEN), opt_rule(typedargslist), opt_rule(positionalonly), tok(DEL_PAREN_CLOSE), opt_rule(funcdefrettype), tok(DEL_COLON), rule(suite))
+DEF_RULE_NC(positionalonly, or(1), tok(OP_SLASH))
 DEF_RULE_NC(funcdefrettype, and_ident(2), tok(DEL_MINUS_MORE), rule(test))
 // note: typedargslist lets through more than is allowed, compiler does further checks
 DEF_RULE_NC(typedargslist, list_with_end, rule(typedargslist_item), tok(DEL_COMMA))
