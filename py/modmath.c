@@ -210,47 +210,34 @@ MATH_FUN_1(lgamma, lgamma)
   *  x,y = y, x mod y
   * return x
 */
-STATIC mp_obj_t gcd_func(mp_obj_t x, mp_obj_t y) {
-
+mp_obj_t gcd_func(mp_obj_t x, mp_obj_t y) {
     mp_obj_t temp;
-    mp_obj_t zero = mp_obj_new_int(0);
-
-    // if x < y: x,y = y, x
     if (mp_binary_op(MP_BINARY_OP_LESS, x, y) == mp_const_true){
         temp = x;
         x = y;
         y = temp;
-
     }
 
+    mp_obj_t zero = mp_obj_new_int(0);
     while(mp_binary_op(MP_BINARY_OP_NOT_EQUAL, y, zero) == mp_const_true) {
         temp = y;
         y = mp_binary_op(MP_BINARY_OP_MODULO, x,y);
         x = temp;
-//        printf("")
     }
-
-
-
-
-
     return x;
 }
 
-STATIC mp_obj_t mp_math_gcd(size_t n_args, const mp_obj_t *args) {
-    //cast e,d to void pointer instead of ints
-    mp_obj_t e = args[--n_args];
-    mp_obj_t d = args[--n_args];
-    mp_obj_t zero = mp_obj_new_int(0);
+mp_obj_t gcd_preprocess_arg(mp_obj_t presumed_integer) {
+    if (!mp_obj_is_int(presumed_integer)) {
+        mp_raise_msg_varg(&mp_type_TypeError,
+                          MP_ERROR_TEXT("can't convert %s to int"), mp_obj_get_type_str(presumed_integer));
+    }
+    return mp_unary_op(MP_UNARY_OP_ABS, presumed_integer);
+}
 
-    // if e < 0: e = -e
-    if (mp_binary_op(MP_BINARY_OP_LESS, e, zero) == mp_const_true){
-        e = mp_unary_op(MP_UNARY_OP_NEGATIVE, e);
-    }
-    // if d < 0: d = -d
-    if (mp_binary_op(MP_BINARY_OP_LESS, d, zero) == mp_const_true) {
-        d = mp_unary_op(MP_UNARY_OP_NEGATIVE, d);
-    }
+STATIC mp_obj_t mp_math_gcd(size_t n_args, const mp_obj_t *args) {
+    mp_obj_t e = gcd_preprocess_arg(args[--n_args]);
+    mp_obj_t d = gcd_preprocess_arg(args[--n_args]);
 
     mp_obj_t ans = gcd_func(d, e);
     if (n_args == 0) {
@@ -259,10 +246,7 @@ STATIC mp_obj_t mp_math_gcd(size_t n_args, const mp_obj_t *args) {
 
     // gcd(a, gcd(b, gcd(c, gcd(d, e)))))
     do {
-        mp_obj_t next_variable = args[--n_args];
-        if (mp_binary_op(MP_BINARY_OP_LESS, next_variable, zero) == mp_const_true) {
-            next_variable = mp_unary_op(MP_UNARY_OP_NEGATIVE, next_variable);
-        }
+        mp_obj_t next_variable = gcd_preprocess_arg(args[--n_args]);
         ans = gcd_func(next_variable, ans);
     } while (n_args > 0);
     return ans;
