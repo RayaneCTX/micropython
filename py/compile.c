@@ -166,6 +166,7 @@ typedef struct _compiler_t {
     uint8_t is_repl;
     uint8_t pass; // holds enum type pass_kind_t
     uint8_t have_star;
+    uint8_t have_slash;
 
     // try to keep compiler clean from nlr
     mp_obj_t compile_error; // set to an exception object if there's an error
@@ -684,6 +685,7 @@ STATIC void compile_funcdef_lambdef_param(compiler_t *comp, mp_parse_node_t pn) 
         pn_kind = -1;
     } else if (MP_PARSE_NODE_IS_TOKEN_KIND(pn, MP_TOKEN_OP_SLASH)) {
         pn_kind = MP_TOKEN_OP_SLASH;
+        comp->have_slash = true;
     } else {
         assert(MP_PARSE_NODE_IS_STRUCT(pn));
         pn_kind = MP_PARSE_NODE_STRUCT_KIND((mp_parse_node_struct_t *)pn);
@@ -782,6 +784,7 @@ STATIC void compile_funcdef_lambdef(compiler_t *comp, scope_t *scope, mp_parse_n
 
     // compile default parameters
     comp->have_star = false;
+    comp->have_slash = false;
     comp->num_dict_params = 0;
     comp->num_default_params = 0;
     apply_to_single_or_list(comp, pn_params, pn_list_kind, compile_funcdef_lambdef_param);
