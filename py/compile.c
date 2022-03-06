@@ -682,6 +682,8 @@ STATIC void compile_funcdef_lambdef_param(compiler_t *comp, mp_parse_node_t pn) 
     int pn_kind;
     if (MP_PARSE_NODE_IS_ID(pn)) {
         pn_kind = -1;
+    } else if (MP_PARSE_NODE_IS_TOKEN_KIND(pn, MP_TOKEN_OP_SLASH)) {
+        pn_kind = MP_TOKEN_OP_SLASH;
     } else {
         assert(MP_PARSE_NODE_IS_STRUCT(pn));
         pn_kind = MP_PARSE_NODE_STRUCT_KIND((mp_parse_node_struct_t *)pn);
@@ -701,6 +703,8 @@ STATIC void compile_funcdef_lambdef_param(compiler_t *comp, mp_parse_node_t pn) 
     } else if (pn_kind == PN_typedargslist_dbl_star || pn_kind == PN_varargslist_dbl_star) {
         // named double star
         // TODO do we need to do anything with this?
+
+    } else if (pn_kind == MP_TOKEN_OP_SLASH) {
 
     } else {
         mp_parse_node_t pn_id;
@@ -2887,6 +2891,8 @@ STATIC void compile_scope_func_lambda_param(compiler_t *comp, mp_parse_node_t pn
             comp->scope_cur->num_pos_args += 1;
         }
         mp_emit_common_use_qstr(&comp->emit_common, param_name);
+    } else if (MP_PARSE_NODE_IS_TOKEN_KIND(pn, MP_TOKEN_OP_SLASH)) {
+
     } else {
         assert(MP_PARSE_NODE_IS_STRUCT(pn));
         pns = (mp_parse_node_struct_t *)pn;

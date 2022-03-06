@@ -71,12 +71,11 @@ DEF_RULE_NC(async_funcdef, and(2), tok(KW_ASYNC), rule(funcdef))
 #else
 DEF_RULE_NC(decorated_body, or(2), rule(classdef), rule(funcdef))
 #endif
-DEF_RULE(funcdef, c(funcdef), and_blank(9), tok(KW_DEF), tok(NAME), tok(DEL_PAREN_OPEN), opt_rule(typedargslist), opt_rule(positionalonly), tok(DEL_PAREN_CLOSE), opt_rule(funcdefrettype), tok(DEL_COLON), rule(suite))
-DEF_RULE_NC(positionalonly, or(1), tok(OP_SLASH))
+DEF_RULE(funcdef, c(funcdef), and_blank(8), tok(KW_DEF), tok(NAME), tok(DEL_PAREN_OPEN), opt_rule(typedargslist), tok(DEL_PAREN_CLOSE), opt_rule(funcdefrettype), tok(DEL_COLON), rule(suite))
 DEF_RULE_NC(funcdefrettype, and_ident(2), tok(DEL_MINUS_MORE), rule(test))
 // note: typedargslist lets through more than is allowed, compiler does further checks
 DEF_RULE_NC(typedargslist, list_with_end, rule(typedargslist_item), tok(DEL_COMMA))
-DEF_RULE_NC(typedargslist_item, or(3), rule(typedargslist_name), rule(typedargslist_star), rule(typedargslist_dbl_star))
+DEF_RULE_NC(typedargslist_item, or(4), rule(typedargslist_name), rule(typedargslist_star), rule(typedargslist_dbl_star), tok(OP_SLASH))
 DEF_RULE_NC(typedargslist_name, and_ident(3), tok(NAME), opt_rule(generic_colon_test), opt_rule(generic_equal_test))
 DEF_RULE_NC(typedargslist_star, and(2), tok(OP_STAR), opt_rule(tfpdef))
 DEF_RULE_NC(typedargslist_dbl_star, and(3), tok(OP_DBL_STAR), tok(NAME), opt_rule(generic_colon_test))
