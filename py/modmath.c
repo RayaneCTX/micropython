@@ -26,6 +26,7 @@
 
 #include "py/builtin.h"
 #include "py/runtime.h"
+#include <stdio.h>
 
 #if MICROPY_PY_BUILTINS_FLOAT && MICROPY_PY_MATH
 
@@ -241,7 +242,6 @@ mp_obj_t lcm_func(mp_obj_t x, mp_obj_t y) {
     mp_obj_t lcm;
     printf("x: %ld, y: %ld", mp_obj_get_int(x), mp_obj_get_int(y));
     if(mp_binary_op(MP_BINARY_OP_EQUAL, x, zero) == mp_const_true) {
-        printf("hello");
         return 0;
     }
     if(mp_binary_op(MP_BINARY_OP_EQUAL, y, zero) == mp_const_true) {
