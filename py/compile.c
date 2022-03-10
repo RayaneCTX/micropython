@@ -684,6 +684,11 @@ STATIC void compile_funcdef_lambdef_param(compiler_t *comp, mp_parse_node_t pn) 
     if (MP_PARSE_NODE_IS_ID(pn)) {
         pn_kind = -1;
     } else if (MP_PARSE_NODE_IS_TOKEN_KIND(pn, MP_TOKEN_OP_SLASH)) {
+        if (comp->have_star) {
+            compile_syntax_error(comp, pn, "foo");
+        }
+        //EMIT_ARG(load_const_tok, MP_TOKEN_OP_SLASH);
+        // Todo: can I safely return ???
         pn_kind = MP_TOKEN_OP_SLASH;
         comp->have_slash = true;
     } else {

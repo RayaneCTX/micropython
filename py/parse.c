@@ -922,7 +922,7 @@ mp_parse_tree_t mp_parse(mp_lexer_t *lex, mp_parse_input_kind_t input_kind) {
         #if 0
         // debugging
         printf("depth=" UINT_FMT " ", parser.rule_stack_top);
-        for (int j = 0; j < parser.rule_stack_top; ++j) {
+        for (size_t j = 0; j < parser.rule_stack_top; ++j) {
             printf(" ");
         }
         printf("%s n=" UINT_FMT " i=" UINT_FMT " bt=%d\n", rule_name_table[rule_id], n, i, backtrack);
