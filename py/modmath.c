@@ -235,6 +235,46 @@ mp_obj_t gcd_preprocess_arg(mp_obj_t presumed_integer) {
     return mp_unary_op(MP_UNARY_OP_ABS, presumed_integer);
 }
 
+mp_obj_t lcm_func(mp_obj_t x, mp_obj_t y) {
+    mp_obj_t zero = mp_obj_new_int(0);
+    mp_obj_t min, max;
+    mp_obj_t lcm;
+    printf("x: %ld, y: %ld", mp_obj_get_int(x), mp_obj_get_int(y));
+    if(mp_binary_op(MP_BINARY_OP_EQUAL, x, zero) == mp_const_true) {
+        printf("hello");
+        return 0;
+    }
+    if(mp_binary_op(MP_BINARY_OP_EQUAL, y, zero) == mp_const_true) {
+        return 0;
+    }
+    assert(mp_obj_get_int(x) > 0);
+    assert(mp_obj_get_int(y) > 0);
+
+    if(mp_binary_op(MP_BINARY_OP_LESS,x,y) == mp_const_true) {
+        max = y;
+        min = x;
+    }
+    else {
+        max = x;
+        min = y;
+    }
+    lcm = max;
+    printf("lcm: %ld", mp_obj_get_int(lcm));
+
+//    while(mp_binary_op(MP_BINARY_OP_NOT_EQUAL, y, zero) == mp_const_true) {
+//        temp = y;
+//        y = mp_binary_op(MP_BINARY_OP_MODULO, x,y);
+//        x = temp;
+//    }
+
+//    while(lcm % min != 0)
+
+    while(mp_binary_op(MP_BINARY_OP_NOT_EQUAL,mp_binary_op(MP_BINARY_OP_MODULO, lcm, min),zero) == mp_const_true) {
+        lcm = mp_binary_op(MP_BINARY_OP_ADD,lcm, max);
+    }
+    return lcm;
+}
+
 STATIC mp_obj_t mp_math_gcd(size_t n_args, const mp_obj_t *args) {
     mp_obj_t e = gcd_preprocess_arg(args[--n_args]);
     mp_obj_t d = gcd_preprocess_arg(args[--n_args]);
@@ -252,6 +292,25 @@ STATIC mp_obj_t mp_math_gcd(size_t n_args, const mp_obj_t *args) {
     return ans;
 }
 MP_DEFINE_CONST_FUN_OBJ_VAR(mp_math_gcd_obj, 2, mp_math_gcd);
+
+
+STATIC mp_obj_t mp_math_lcm(size_t n_args, const mp_obj_t *args) {
+    mp_obj_t e = gcd_preprocess_arg(args[--n_args]);
+    mp_obj_t d = gcd_preprocess_arg(args[--n_args]);
+
+    mp_obj_t ans = lcm_func(d, e);
+    if (n_args == 0) {
+        return ans;
+    }
+
+    // gcd(a, gcd(b, gcd(c, gcd(d, e)))))
+    do {
+        mp_obj_t next_variable = gcd_preprocess_arg(args[--n_args]);
+        ans = lcm_func(next_variable, ans);
+    } while (n_args > 0);
+    return ans;
+}
+MP_DEFINE_CONST_FUN_OBJ_VAR(mp_math_lcm_obj, 2, mp_math_lcm);
 
 #endif // MICROPY_PY_MATH_SPECIAL_FUNCTIONS
 // TODO: fsum
@@ -480,6 +539,8 @@ STATIC const mp_rom_map_elem_t mp_module_math_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_gamma), MP_ROM_PTR(&mp_math_gamma_obj) },
     { MP_ROM_QSTR(MP_QSTR_lgamma), MP_ROM_PTR(&mp_math_lgamma_obj) },
     { MP_ROM_QSTR(MP_QSTR_gcd), MP_ROM_PTR(&mp_math_gcd_obj) },
+    { MP_ROM_QSTR(MP_QSTR_lcm), MP_ROM_PTR(&mp_math_lcm_obj) },
+
     #endif
 };
 
