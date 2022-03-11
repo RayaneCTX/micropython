@@ -79,6 +79,7 @@ DEF_RULE_NC(typedargslist_item, or(4), rule(typedargslist_name), rule(typedargsl
 DEF_RULE_NC(typedargslist_name, and_ident(3), tok(NAME), opt_rule(generic_colon_test), opt_rule(generic_equal_test))
 DEF_RULE_NC(typedargslist_star, and(2), tok(OP_STAR), opt_rule(tfpdef))
 DEF_RULE_NC(typedargslist_dbl_star, and(3), tok(OP_DBL_STAR), tok(NAME), opt_rule(generic_colon_test))
+DEF_RULE_NC(typedargslist_positional_only, and(1), tok(OP_SLASH))
 DEF_RULE_NC(tfpdef, and(2), tok(NAME), opt_rule(generic_colon_test))
 // note: varargslist lets through more than is allowed, compiler does further checks
 DEF_RULE_NC(varargslist, list_with_end, rule(varargslist_item), tok(DEL_COMMA))

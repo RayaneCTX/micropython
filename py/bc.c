@@ -143,11 +143,13 @@ void mp_setup_code_state(mp_code_state_t *code_state, size_t n_args, size_t n_kw
     size_t n_state = code_state->n_state;
 
     // Decode prelude
-    size_t n_state_unused, n_exc_stack_unused, scope_flags, n_pos_args, n_kwonly_args, n_def_pos_args;
-    MP_BC_PRELUDE_SIG_DECODE_INTO(code_state->ip, n_state_unused, n_exc_stack_unused, scope_flags, n_pos_args, n_kwonly_args, n_def_pos_args);
+    size_t n_state_unused, n_exc_stack_unused, scope_flags, n_pos_args_pair, n_kwonly_args, n_def_pos_args;
+    MP_BC_PRELUDE_SIG_DECODE_INTO(code_state->ip, n_state_unused, n_exc_stack_unused, scope_flags, n_pos_args_pair, n_kwonly_args, n_def_pos_args);
     MP_BC_PRELUDE_SIZE_DECODE(code_state->ip);
     (void)n_state_unused;
     (void)n_exc_stack_unused;
+    size_t n_pos_args = (n_pos_args_pair & 0xFF) + (n_pos_args_pair >> 8);
+    size_t n_posonly_args = n_pos_args_pair >> 8;
 
     code_state->sp = &code_state->state[0] - 1;
     code_state->exc_sp_idx = 0;
@@ -162,6 +164,7 @@ void mp_setup_code_state(mp_code_state_t *code_state, size_t n_args, size_t n_kw
 
     // check positional arguments
 
+    size_t n_not_given_def_args = 0;
     if (n_args > n_pos_args) {
         // given more than enough arguments
         if ((scope_flags & MP_SCOPE_FLAG_VARARGS) == 0) {
@@ -181,6 +184,7 @@ void mp_setup_code_state(mp_code_state_t *code_state, size_t n_args, size_t n_kw
             if (n_args >= (size_t)(n_pos_args - n_def_pos_args)) {
                 // given enough arguments, but may need to use some default arguments
                 for (size_t i = n_args; i < n_pos_args; i++) {
+                    n_not_given_def_args += 1;
                     code_state->state[n_state - 1 - i] = self->extra_args[i - (n_pos_args - n_def_pos_args)];
                 }
             } else {
@@ -189,8 +193,16 @@ void mp_setup_code_state(mp_code_state_t *code_state, size_t n_args, size_t n_kw
         }
     }
 
+    // n_args 1
+    // n_def_pos_args 1
+    // n_posonly_args 2
+    // n_pos_args 2
+    if (n_args + n_not_given_def_args < n_posonly_args) {
+        fun_pos_args_mismatch(self, n_posonly_args, n_args);
+    }
     // copy positional args into state
     for (size_t i = 0; i < n_args; i++) {
+        // if args[i] includes keyword and i < num_posonly_args raise
         code_state->state[n_state - 1 - i] = args[i];
     }
 

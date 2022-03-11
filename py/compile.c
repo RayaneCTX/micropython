@@ -685,12 +685,9 @@ STATIC void compile_funcdef_lambdef_param(compiler_t *comp, mp_parse_node_t pn) 
         pn_kind = -1;
     } else if (MP_PARSE_NODE_IS_TOKEN_KIND(pn, MP_TOKEN_OP_SLASH)) {
         if (comp->have_star) {
-            compile_syntax_error(comp, pn, "foo");
+            compile_syntax_error(comp, pn, MP_ERROR_TEXT("invalid syntax"));
         }
-        //EMIT_ARG(load_const_tok, MP_TOKEN_OP_SLASH);
-        // Todo: can I safely return ???
-        pn_kind = MP_TOKEN_OP_SLASH;
-        comp->have_slash = true;
+        return;
     } else {
         assert(MP_PARSE_NODE_IS_STRUCT(pn));
         pn_kind = MP_PARSE_NODE_STRUCT_KIND((mp_parse_node_struct_t *)pn);
@@ -710,8 +707,6 @@ STATIC void compile_funcdef_lambdef_param(compiler_t *comp, mp_parse_node_t pn) 
     } else if (pn_kind == PN_typedargslist_dbl_star || pn_kind == PN_varargslist_dbl_star) {
         // named double star
         // TODO do we need to do anything with this?
-
-    } else if (pn_kind == MP_TOKEN_OP_SLASH) {
 
     } else {
         mp_parse_node_t pn_id;
@@ -2886,6 +2881,16 @@ STATIC void compile_scope_func_lambda_param(compiler_t *comp, mp_parse_node_t pn
         return;
     }
 
+    // [arg1, arg2, arg3, /, arg4, *, arg5, arg6]
+
+    // arg1
+    // arg2
+    // arg3
+    // "/" 3 -> >> 8
+    // arg4 -> 0 -> 1
+    // ...
+    // * -> comp->have_star = true
+    // arg5 -> num_kwonly ++
     qstr param_name = MP_QSTRnull;
     uint param_flag = ID_FLAG_IS_PARAM;
     mp_parse_node_struct_t *pns = NULL;
@@ -2900,7 +2905,9 @@ STATIC void compile_scope_func_lambda_param(compiler_t *comp, mp_parse_node_t pn
         }
         mp_emit_common_use_qstr(&comp->emit_common, param_name);
     } else if (MP_PARSE_NODE_IS_TOKEN_KIND(pn, MP_TOKEN_OP_SLASH)) {
-
+        // comes before a slash, so counts as positional-only parameter
+        comp->scope_cur->num_pos_args = comp->scope_cur->num_pos_args << 8;
+        printf("hello world\n");
     } else {
         assert(MP_PARSE_NODE_IS_STRUCT(pn));
         pns = (mp_parse_node_struct_t *)pn;
