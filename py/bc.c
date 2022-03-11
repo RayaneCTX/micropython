@@ -197,8 +197,11 @@ void mp_setup_code_state(mp_code_state_t *code_state, size_t n_args, size_t n_kw
     // n_def_pos_args 1
     // n_posonly_args 2
     // n_pos_args 2
-    if (n_args + n_not_given_def_args < n_posonly_args) {
-        fun_pos_args_mismatch(self, n_posonly_args, n_args);
+    size_t n_def_posonly_args = n_pos_args - n_def_pos_args - n_posonly_args;
+    if (n_args < n_posonly_args - n_def_posonly_args) {
+        // todo inject func name and arg keyword
+        mp_raise_msg_varg(&mp_type_TypeError,
+                          MP_ERROR_TEXT("f() got some positional-only arguments passed as keyword arguments: 'pos2'"));
     }
     // copy positional args into state
     for (size_t i = 0; i < n_args; i++) {
