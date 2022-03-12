@@ -236,7 +236,7 @@ STATIC mp_obj_t gcd_preprocess_arg(mp_obj_t presumed_integer) {
     return mp_unary_op(MP_UNARY_OP_ABS, presumed_integer);
 }
 
-mp_obj_t lcm_func(mp_obj_t x, mp_obj_t y) {
+STATIC mp_obj_t lcm_func(mp_obj_t x, mp_obj_t y) {
     mp_obj_t zero = mp_obj_new_int(0);
     mp_obj_t min, max;
     mp_obj_t lcm;
