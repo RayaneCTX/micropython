@@ -211,27 +211,28 @@ MATH_FUN_1(lgamma, lgamma)
   *  x,y = y, x mod y
   * return x
 */
-mp_obj_t gcd_func(mp_obj_t x, mp_obj_t y) {
+STATIC mp_obj_t gcd_func(mp_obj_t x, mp_obj_t y) {
     mp_obj_t temp;
-    if (mp_binary_op(MP_BINARY_OP_LESS, x, y) == mp_const_true){
+    if (mp_binary_op(MP_BINARY_OP_LESS, x, y) == mp_const_true) {
         temp = x;
         x = y;
         y = temp;
     }
 
     mp_obj_t zero = mp_obj_new_int(0);
-    while(mp_binary_op(MP_BINARY_OP_NOT_EQUAL, y, zero) == mp_const_true) {
+
+    while (mp_binary_op(MP_BINARY_OP_NOT_EQUAL, y, zero) == mp_const_true) {
         temp = y;
-        y = mp_binary_op(MP_BINARY_OP_MODULO, x,y);
+        y = mp_binary_op(MP_BINARY_OP_MODULO, x, y);
         x = temp;
     }
     return x;
 }
 
-mp_obj_t gcd_preprocess_arg(mp_obj_t presumed_integer) {
+STATIC mp_obj_t gcd_preprocess_arg(mp_obj_t presumed_integer) {
     if (!mp_obj_is_int(presumed_integer)) {
         mp_raise_msg_varg(&mp_type_TypeError,
-                          MP_ERROR_TEXT("can't convert %s to int"), mp_obj_get_type_str(presumed_integer));
+            MP_ERROR_TEXT("can't convert %s to int"), mp_obj_get_type_str(presumed_integer));
     }
     return mp_unary_op(MP_UNARY_OP_ABS, presumed_integer);
 }
@@ -273,6 +274,7 @@ mp_obj_t lcm_func(mp_obj_t x, mp_obj_t y) {
     }
     return lcm;
 }
+
 
 STATIC mp_obj_t mp_math_gcd(size_t n_args, const mp_obj_t *args) {
     mp_obj_t e = gcd_preprocess_arg(args[--n_args]);
@@ -539,7 +541,6 @@ STATIC const mp_rom_map_elem_t mp_module_math_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_lgamma), MP_ROM_PTR(&mp_math_lgamma_obj) },
     { MP_ROM_QSTR(MP_QSTR_gcd), MP_ROM_PTR(&mp_math_gcd_obj) },
     { MP_ROM_QSTR(MP_QSTR_lcm), MP_ROM_PTR(&mp_math_lcm_obj) },
-
     #endif
 };
 

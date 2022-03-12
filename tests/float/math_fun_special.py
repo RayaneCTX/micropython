@@ -81,6 +81,7 @@ for function_name, function, test_vals in functions_var_args:
 
 print(gcd(12345678912345678912345678911561561658135153135135135, 123456))
 
+
 lcm_function_args = [
     (
         "lcm",
@@ -114,3 +115,4 @@ for function_name, function, test_vals in functions_var_args:
             print("{:.4g}".format(function(*values)))
         except ValueError as e:
             print(str(e))
+
