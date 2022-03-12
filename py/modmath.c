@@ -240,7 +240,7 @@ mp_obj_t lcm_func(mp_obj_t x, mp_obj_t y) {
     mp_obj_t zero = mp_obj_new_int(0);
     mp_obj_t min, max;
     mp_obj_t lcm;
-    printf("x: %ld, y: %ld", mp_obj_get_int(x), mp_obj_get_int(y));
+
     if(mp_binary_op(MP_BINARY_OP_EQUAL, x, zero) == mp_const_true) {
         return 0;
     }
@@ -259,7 +259,6 @@ mp_obj_t lcm_func(mp_obj_t x, mp_obj_t y) {
         min = y;
     }
     lcm = max;
-    printf("lcm: %ld", mp_obj_get_int(lcm));
 
 //    while(mp_binary_op(MP_BINARY_OP_NOT_EQUAL, y, zero) == mp_const_true) {
 //        temp = y;
