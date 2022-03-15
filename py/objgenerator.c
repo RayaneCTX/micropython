@@ -103,8 +103,8 @@ STATIC mp_obj_t native_gen_wrap_call(mp_obj_t self_in, size_t n_args, size_t n_k
 
     // Extract n_state from the prelude.
     const uint8_t *ip = prelude_ptr;
-    size_t n_state, n_exc_stack_unused, scope_flags, n_pos_args, n_kwonly_args, n_def_args;
-    MP_BC_PRELUDE_SIG_DECODE_INTO(ip, n_state, n_exc_stack_unused, scope_flags, n_pos_args, n_kwonly_args, n_def_args);
+    size_t n_state, n_exc_stack_unused, scope_flags, n_pos_args, n_posonly_args, n_kwonly_args, n_def_args;
+    MP_BC_PRELUDE_SIG_DECODE_INTO(ip, n_state, n_exc_stack_unused, scope_flags, n_pos_args, n_posonly_args, n_kwonly_args, n_def_args);
     size_t n_exc_stack = 0;
 
     // Allocate the generator object, with room for local stack and exception stack

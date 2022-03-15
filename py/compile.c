@@ -2906,8 +2906,7 @@ STATIC void compile_scope_func_lambda_param(compiler_t *comp, mp_parse_node_t pn
         mp_emit_common_use_qstr(&comp->emit_common, param_name);
     } else if (MP_PARSE_NODE_IS_TOKEN_KIND(pn, MP_TOKEN_OP_SLASH)) {
         // comes before a slash, so counts as positional-only parameter
-        comp->scope_cur->num_pos_args = comp->scope_cur->num_pos_args << 8;
-        printf("hello world\n");
+        comp->scope_cur->num_posonly_args = comp->scope_cur->num_pos_args;
     } else {
         assert(MP_PARSE_NODE_IS_STRUCT(pn));
         pns = (mp_parse_node_struct_t *)pn;

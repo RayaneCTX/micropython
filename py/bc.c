@@ -143,13 +143,11 @@ void mp_setup_code_state(mp_code_state_t *code_state, size_t n_args, size_t n_kw
     size_t n_state = code_state->n_state;
 
     // Decode prelude
-    size_t n_state_unused, n_exc_stack_unused, scope_flags, n_pos_args_pair, n_kwonly_args, n_def_pos_args;
-    MP_BC_PRELUDE_SIG_DECODE_INTO(code_state->ip, n_state_unused, n_exc_stack_unused, scope_flags, n_pos_args_pair, n_kwonly_args, n_def_pos_args);
+    size_t n_state_unused, n_exc_stack_unused, scope_flags, n_pos_args, n_posonly_args, n_kwonly_args, n_def_pos_args;
+    MP_BC_PRELUDE_SIG_DECODE_INTO(code_state->ip, n_state_unused, n_exc_stack_unused, scope_flags, n_pos_args, n_posonly_args, n_kwonly_args, n_def_pos_args);
     MP_BC_PRELUDE_SIZE_DECODE(code_state->ip);
     (void)n_state_unused;
     (void)n_exc_stack_unused;
-    size_t n_pos_args = (n_pos_args_pair & 0xFF) + (n_pos_args_pair >> 8);
-    size_t n_posonly_args = n_pos_args_pair >> 8;
 
     code_state->sp = &code_state->state[0] - 1;
     code_state->exc_sp_idx = 0;
