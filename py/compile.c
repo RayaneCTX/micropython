@@ -2905,6 +2905,16 @@ STATIC void compile_scope_func_lambda_param(compiler_t *comp, mp_parse_node_t pn
         }
         mp_emit_common_use_qstr(&comp->emit_common, param_name);
     } else if (MP_PARSE_NODE_IS_TOKEN_KIND(pn, MP_TOKEN_OP_SLASH)) {
+        // if slash was used, but no args were detected, that is invalid by spec.
+        if (comp->scope_cur->num_pos_args == 0) {
+            compile_syntax_error(comp, pn, MP_ERROR_TEXT("invalid syntax"));
+            return;
+        }
+        // slash may have appeared twice if posonly_args is already > 0, invalid by spec.
+        if (comp->scope_cur->num_posonly_args > 0) {
+            compile_syntax_error(comp, pn, MP_ERROR_TEXT("invalid syntax"));
+            return;
+        }
         // comes before a slash, so counts as positional-only parameter
         comp->scope_cur->num_posonly_args = comp->scope_cur->num_pos_args;
     } else {
