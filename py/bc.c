@@ -162,7 +162,6 @@ void mp_setup_code_state(mp_code_state_t *code_state, size_t n_args, size_t n_kw
 
     // check positional arguments
 
-    size_t n_not_given_def_args = 0;
     if (n_args > n_pos_args) {
         // given more than enough arguments
         if ((scope_flags & MP_SCOPE_FLAG_VARARGS) == 0) {
@@ -182,7 +181,6 @@ void mp_setup_code_state(mp_code_state_t *code_state, size_t n_args, size_t n_kw
             if (n_args >= (size_t)(n_pos_args - n_def_pos_args)) {
                 // given enough arguments, but may need to use some default arguments
                 for (size_t i = n_args; i < n_pos_args; i++) {
-                    n_not_given_def_args += 1;
                     code_state->state[n_state - 1 - i] = self->extra_args[i - (n_pos_args - n_def_pos_args)];
                 }
             } else {
@@ -191,16 +189,8 @@ void mp_setup_code_state(mp_code_state_t *code_state, size_t n_args, size_t n_kw
         }
     }
 
-
-    size_t n_func_pos_args = n_pos_args - n_posonly_args;
-    size_t n_def_posonly_args = n_def_pos_args > 0 ? n_def_pos_args - n_func_pos_args : 0;
-    if (n_args < n_posonly_args - n_def_posonly_args) {
-        mp_raise_msg_varg(&mp_type_TypeError,
-                          MP_ERROR_TEXT("function got some positional-only arguments passed as keyword arguments"));
-    }
     // copy positional args into state
     for (size_t i = 0; i < n_args; i++) {
-        // if args[i] includes keyword and i < num_posonly_args raise
         code_state->state[n_state - 1 - i] = args[i];
     }
 
@@ -224,11 +214,16 @@ void mp_setup_code_state(mp_code_state_t *code_state, size_t n_args, size_t n_kw
             const uint8_t *arg_names = code_state->ip;
             arg_names = mp_decode_uint_skip(arg_names);
 
+            // Iterating the function definition keywords
             for (size_t j = 0; j < n_pos_args + n_kwonly_args; j++) {
                 qstr arg_qstr = mp_decode_uint(&arg_names);
                 #if MICROPY_EMIT_BYTECODE_USES_QSTR_TABLE
                 arg_qstr = self->context->constants.qstr_table[arg_qstr];
                 #endif
+                if (j < n_posonly_args) {
+                    // Skip keyword indexing for pos only arguments
+                    continue;
+                }
                 if (wanted_arg_name == MP_OBJ_NEW_QSTR(arg_qstr)) {
                     if (code_state->state[n_state - 1 - j] != MP_OBJ_NULL) {
                         mp_raise_msg_varg(&mp_type_TypeError,
