@@ -253,6 +253,40 @@ STATIC mp_obj_t mp_math_gcd(size_t n_args, const mp_obj_t *args) {
 }
 MP_DEFINE_CONST_FUN_OBJ_VAR(mp_math_gcd_obj, 2, mp_math_gcd);
 
+
+STATIC mp_obj_t mp_math_dist(size_t n_args, const mp_obj_t *args){
+    mp_obj_t * point1;  //first point
+    mp_obj_t * point2;  //second point
+    size_t len1, len2;  //lengths of both points
+
+    mp_obj_get_array(args[0],&len1, &point1);
+    mp_obj_get_array(args[1],&len2, &point2);
+
+//    printf("Length of point1: %lu\n", len1 );
+//    printf("Length of point2: %lu\n", len2 );
+
+    //Checks to ensure both inputs have the same dimension
+    if (len1 != len2) {
+        mp_raise_msg_varg(&mp_type_ValueError,
+                          MP_ERROR_TEXT("Input points differ in size"));
+    }
+
+    size_t i;
+    int total = 0;
+//    printf("Point 1: %ld", mp_obj_get_int(point1[1]));
+    for(i = 0; i < len1; i++) {
+        total += (mp_obj_get_int(point1[i]) - mp_obj_get_int(point2[i])) * (mp_obj_get_int(point1[i]) - mp_obj_get_int(point2[i]));
+    }
+
+    double distance = sqrt(total);
+
+    mp_obj_t final = mp_obj_new_float(distance);
+    return final;
+}
+
+MP_DEFINE_CONST_FUN_OBJ_VAR(mp_math_dist_obj, 2, mp_math_dist);
+
+
 #endif // MICROPY_PY_MATH_SPECIAL_FUNCTIONS
 // TODO: fsum
 
@@ -480,6 +514,7 @@ STATIC const mp_rom_map_elem_t mp_module_math_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_gamma), MP_ROM_PTR(&mp_math_gamma_obj) },
     { MP_ROM_QSTR(MP_QSTR_lgamma), MP_ROM_PTR(&mp_math_lgamma_obj) },
     { MP_ROM_QSTR(MP_QSTR_gcd), MP_ROM_PTR(&mp_math_gcd_obj) },
+    { MP_ROM_QSTR(MP_QSTR_dist), MP_ROM_PTR(&mp_math_dist_obj) },
     #endif
 };
 
