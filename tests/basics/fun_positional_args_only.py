@@ -3,6 +3,10 @@
 # Tests sourced from 
 # https://github.com/python/cpython/blob/main/Lib/test/test_positional_only_arg.py
 
+# Not all tests were ported due to incompatibilities with 
+# MicroPython, such as required modules like pickle and dis
+# not being implemented.
+
 def tryFunctionFail(s):
     try:
         eval(s)
@@ -68,6 +72,7 @@ for s in invalid_tests:
 print("\ntest_optional_positional_only_args")
 def assertEqual(f, res):
     assert(f == res)
+    print("PASSED: Assertion check")
 
 def f(a, b=10, /, c=100):
     return a + b + c
@@ -90,32 +95,6 @@ tryFunctionFail("f(1, b=2, c=3)")
 assertEqual(f(1, 2), 103)
 tryFunctionFail("f(1, b=2)")
 assertEqual(f(1, c=2), 13)
-
-##################################################
-# test_syntax_for_many_positional_only
-print("\ntest_syntax_for_many_positional_only")
-tryFunctionPass("def f(%s, /):\n  pass\n" % ', '.join('i%d' % i for i in range(300)))
-
-##################################################
-# test_pos_only_definition
-print("\ntest_pos_only_definition")
-def f(a, b, c, /, d, e=1, *, f, g=2):
-    pass
-
-try:
-    assertEqual(5, f.__code__.co_argcount)  # 3 posonly + 2 "standard args"
-    assertEqual(3, f.__code__.co_posonlyargcount)
-    assertEqual((1,), f.__defaults__)
-
-    def f(a, b, c=1, /, d=2, e=3, *, f, g=4):
-        pass
-
-    assertEqual(5, f.__code__.co_argcount)  # 3 posonly + 2 "standard args"
-    assertEqual(3, f.__code__.co_posonlyargcount)
-    assertEqual((1, 2, 3), f.__defaults__)
-except Exception as e:
-    print("FAILED: test_pos_only_definition")
-    print(e)
 
 ##################################################
 # test_pos_only_call_via_unpacking
@@ -223,31 +202,20 @@ tryFunctionPass("f(1, 2, c=3)")
 tryFunctionFail("f(1, b=2, c=3)")
 
 ##################################################
-# test_change_default_pos_only
-print("\ntest_change_default_pos_only")
-def f(a, b=2, /, c=3):
-    return a + b + c
-
-try:
-    assertEqual((2,3), f.__defaults__)
-except:
-    print("FAILED test_change_default_pos_only")
-
-##################################################
 # test_lambdas
 print("\ntest_lambdas")
 try:
-    eval("x = lambda a, /, b: a + b")
+    x = lambda a, /, b: a + b
     assertEqual(x(1,2), 3)
     assertEqual(x(1,b=2), 3)
 
-    eval("x = lambda a, /, b=2: a + b")
+    x = lambda a, /, b=2: a + b
     assertEqual(x(1), 3)
 
-    eval("x = lambda a, b, /: a + b")
+    x = lambda a, b, /: a + b
     assertEqual(x(1, 2), 3)
 
-    eval("x = lambda a, b, /, : a + b")
+    x = lambda a, b, /, : a + b
     assertEqual(x(1, 2), 3)
 except:
     print("FAILED: test_lambdas not working")
@@ -287,3 +255,127 @@ assertEqual(Example.f(Example(), 1, 2), (1, 2))
 tryFunctionFail("Example.f(1,2)")
 # f() got some positional-only arguments passed as keyword arguments: 'b'
 tryFunctionFail("Example().f(1, b=2)")
+
+##################################################
+# test_module_function
+print("\ntest_module_function")
+def f(a, b, /):
+    pass
+tryFunctionFail("f()")
+
+##################################################
+# test_closures
+print("\ntest_closures")
+def f(x,y):
+    def g(x2,/,y2):
+        return x + y + x2 + y2
+    return g
+
+assertEqual(f(1,2)(3,4), 10)
+tryFunctionFail("f(1,2)(3)")
+tryFunctionFail("f(1,2)(3,4,5)")
+
+def f(x,/,y):
+    def g(x2,y2):
+        return x + y + x2 + y2
+    return g
+assertEqual(f(1,2)(3,4), 10)
+
+def f(x,/,y):
+    def g(x2,/,y2):
+        return x + y + x2 + y2
+    return g
+assertEqual(f(1,2)(3,4), 10)
+tryFunctionFail("f(1,2)(3)")
+tryFunctionFail("f(1,2)(3,4,5)")
+
+
+##################################################
+# test_same_keyword_as_positional_with_kwargs
+print("\ntest_same_keyword_as_positional_with_kwargs")
+def f(something,/,**kwargs):
+    return (something, kwargs)
+
+assertEqual(f(42, something=42), (42, {'something': 42}))
+tryFunctionFail("f(something=42)")
+assertEqual(f(42), (42, {}))
+
+
+##################################################
+# test_mangling
+print("\ntest_mangling")
+class X:
+    def f(self, __a=42, /):
+        return __a
+
+    def f2(self, __a=42, /, __b=43):
+        return (__a, __b)
+
+    def f3(self, __a=42, /, __b=43, *, __c=44):
+        return (__a, __b, __c)
+
+assertEqual(X().f(), 42)
+assertEqual(X().f2(), (42, 43))
+assertEqual(X().f3(), (42, 43, 44))
+
+##################################################
+# test_too_many_arguments
+print("\ntest_too_many_arguments")
+fundef = "def f(%s, /):\n  pass\n" % ', '.join('i%d' % i for i in range(300))
+compile(fundef, "<test>", "single")
+print("PASSED: > 255 arg check")
+
+##################################################
+# test_async
+print("\ntest_async")
+async def f(a=1, /, b=2):
+    return a, b
+
+tryFunctionFail("f(a=1, b=2)")
+
+def _check_call(*args, **kwargs):
+    try:
+        coro = f(*args, **kwargs)
+        coro.send(None)
+    except StopIteration as e:
+        result = e.value
+    assertEqual(result, (1, 2))
+
+_check_call(1, 2)
+_check_call(1, b=2)
+_check_call(1)
+_check_call()
+
+
+##################################################
+# test_generator
+print("\ntest_generator")
+def f(a=1, /, b=2):
+    yield a, b
+
+tryFunctionFail("f(a=1, b=2)")
+
+gen = f(1, 2)
+assertEqual(next(gen), (1, 2))
+gen = f(1, b=2)
+assertEqual(next(gen), (1, 2))
+gen = f(1)
+assertEqual(next(gen), (1, 2))
+gen = f()
+assertEqual(next(gen), (1, 2))
+
+
+##################################################
+# test_super
+print("\ntest_super")
+sentinel = object()
+
+class A:
+    def method(self):
+        return sentinel
+
+class C(A):
+    def method(self, /):
+        return super().method()
+
+assertEqual(C().method(), sentinel)
