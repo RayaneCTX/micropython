@@ -32,13 +32,14 @@
 // bytecode layout:
 //
 //  func signature  : var uint
-//      contains six values interleaved bit-wise as: xSSSSEAA [xFSSKAED repeated]
+//      contains six values interleaved bit-wise as: xSSSSEAA [xFSPKAED repeated]
 //          x = extension           another byte follows
 //          S = n_state - 1         number of entries in Python value stack
 //          E = n_exc_stack         number of entries in exception stack
 //          F = scope_flags         four bits of flags, MP_SCOPE_FLAG_xxx
 //          A = n_pos_args          number of arguments this function takes
 //          K = n_kwonly_args       number of keyword-only arguments this function takes
+//          P = n_posonly_args      number of positional-only arguments this function takes
 //          D = n_def_pos_args      number of default positional arguments
 //
 //  prelude size    : var uint
@@ -129,17 +130,6 @@
         S += 1;                                                     \
     } while (0)
 
-/*
-    for (unsigned n = 0; z & 0x80; ++n) {
-    z = *(ip)++;
-    / xFSSKAED /
-    F |= ((z & 0x40) >> 6) << n;
-    S |= (z & 0x30) << (2 * n);
-    K |= ((z & 0x08) >> 3) << n;
-    A |= (z & 0x4) << n;
-    E |= (z & 0x02) << n;
-    D |= (z & 0x1) << n;
-}*/
 #define MP_BC_PRELUDE_SIG_DECODE(ip) \
     size_t n_state, n_exc_stack, scope_flags, n_pos_args, n_posonly_args, n_kwonly_args, n_def_pos_args; \
     MP_BC_PRELUDE_SIG_DECODE_INTO(ip, n_state, n_exc_stack, scope_flags, n_pos_args, n_posonly_args, n_kwonly_args, n_def_pos_args); \
