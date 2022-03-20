@@ -134,7 +134,7 @@
     size_t n_state, n_exc_stack, scope_flags, n_pos_args, n_posonly_args, n_kwonly_args, n_def_pos_args; \
     MP_BC_PRELUDE_SIG_DECODE_INTO(ip, n_state, n_exc_stack, scope_flags, n_pos_args, n_posonly_args, n_kwonly_args, n_def_pos_args); \
     (void)n_state; (void)n_exc_stack; (void)scope_flags; \
-    (void)n_pos_args; (void)n_kwonly_args; (void)n_def_pos_args
+    (void)n_pos_args; (void)n_kwonly_args; (void)n_def_pos_args; (void)n_posonly_args
 
 #define MP_BC_PRELUDE_SIZE_ENCODE(I, C, out_byte, out_env)      \
     do {                                                            \
