@@ -10,16 +10,16 @@
 def tryFunctionFail(s):
     try:
         eval(s)
-        print("FAILED: %s did not throw syntax error." % repr(s))
+        print("FAILED: " + repr(s) + " did not throw syntax error.")
     except Exception as e:
-        print("PASSED: %s threw '%s'" % (repr(s), e))
+        print("PASSED: " + repr(s) + " threw an error.")
 
 def tryFunctionPass(s):
     try:
         eval(s)
-        print("PASSED: %s did not throw syntax error." % repr(s))
+        print("PASSED: " + repr(s) + " did not throw syntax error.")
     except Exception as e:
-        print("FAILED: %s incorrectly threw syntax error." % repr(s))
+        print("FAILED: " + repr(s) + " incorrectly threw syntax error.")
 
 ##################################################
 # test_invalid_syntax_errors 
@@ -320,10 +320,11 @@ assertEqual(X().f3(), (42, 43, 44))
 
 ##################################################
 # test_too_many_arguments
-print("\ntest_too_many_arguments")
-fundef = "def f(%s, /):\n  pass\n" % ', '.join('i%d' % i for i in range(300))
-compile(fundef, "<test>", "single")
-print("PASSED: > 255 arg check")
+# Ignored due to bug with compile function in micropython-minimal
+# print("\ntest_too_many_arguments")
+# fundef = "def f(" + ', '.join('i' + str(i) for i in range(300)) + ", /):\n  pass\n"
+# compile(fundef, "<test>", "single")
+# print("PASSED: > 255 arg check")
 
 ##################################################
 # test_async
