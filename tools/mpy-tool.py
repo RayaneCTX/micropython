@@ -399,6 +399,7 @@ def extract_prelude(bytecode, ip):
         n_exc_stack,
         scope_flags,
         n_pos_args,
+        n_posonly_args,
         n_kwonly_args,
         n_def_pos_args,
     ) = read_prelude_sig(local_read_byte)
@@ -426,7 +427,7 @@ def extract_prelude(bytecode, ip):
         ip2,
         ip,
         ip_ref[0],
-        (n_state, n_exc_stack, scope_flags, n_pos_args, n_kwonly_args, n_def_pos_args),
+        (n_state, n_exc_stack, scope_flags, n_pos_args, n_posonly_args, n_kwonly_args, n_def_pos_args),
         args,
     )
 
@@ -772,8 +773,9 @@ class RawCode(object):
             print("        .n_exc_stack = %u," % self.prelude[1])
             print("        .scope_flags = %u," % self.prelude[2])
             print("        .n_pos_args = %u," % self.prelude[3])
-            print("        .n_kwonly_args = %u," % self.prelude[4])
-            print("        .n_def_pos_args = %u," % self.prelude[5])
+            print("        .n_posonly_args = %u," % self.prelude[4])
+            print("        .n_kwonly_args = %u," % self.prelude[5])
+            print("        .n_def_pos_args = %u," % self.prelude[6])
             print("        .qstr_block_name_idx = %u," % self.names[0])
             print(
                 "        .line_info = fun_data_%s + %u,"

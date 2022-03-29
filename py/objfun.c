@@ -298,9 +298,9 @@ STATIC mp_obj_t fun_bc_call(mp_obj_t self_in, size_t n_args, size_t n_kw, const 
     }
     const byte *bytecode_ptr = self->bytecode;
     size_t n_state_unused, n_exc_stack_unused, scope_flags_unused;
-    size_t n_pos_args, n_kwonly_args, n_def_args_unused;
+    size_t n_pos_args, n_posonly_args_unused, n_kwonly_args, n_def_args_unused;
     MP_BC_PRELUDE_SIG_DECODE_INTO(bytecode_ptr, n_state_unused, n_exc_stack_unused,
-        scope_flags_unused, n_pos_args, n_kwonly_args, n_def_args_unused);
+        scope_flags_unused, n_pos_args, n_posonly_args_unused, n_kwonly_args, n_def_args_unused);
     // We can't check the case when an exception is returned in state[0]
     // and there are no arguments, because in this case our detection slot may have
     // been overwritten by the returned exception (which is allowed).
