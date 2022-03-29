@@ -806,6 +806,9 @@ STATIC void push_result_rule(parser_t *parser, size_t src_line, uint8_t rule_id,
             // need to keep parenthesis for ()
         } else if (MP_PARSE_NODE_IS_STRUCT_KIND(pn, RULE_testlist_comp)) {
             // need to keep parenthesis for (a, b, ...)
+        } else if (MP_PARSE_NODE_IS_ID(pn) && parser->rule_stack[parser->rule_stack_top - 15].rule_id == RULE_arglist) {
+            // Keep parentheses around single IDs that are function arguments
+            // since they may be keyword arguments.
         } else {
             // parenthesis around a single expression, so it's just the expression
             return;
