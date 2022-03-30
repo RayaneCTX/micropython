@@ -355,21 +355,25 @@ def read_prelude_sig(read_byte):
     E = (z >> 2) & 0x1
     F = 0
     A = z & 0x3
+    P = 0
     K = 0
     D = 0
     n = 0
     while z & 0x80:
         z = read_byte()
-        # xFSSKAED
+        # xFSS(PorK)AED
         S |= (z & 0x30) << (2 * n)
         E |= (z & 0x02) << n
         F |= ((z & 0x40) >> 6) << n
         A |= (z & 0x4) << n
-        K |= ((z & 0x08) >> 3) << n
+        if n % 2 == 0:
+            P |= ((z & 0x08) >> 3) << (n >> 1)
+        else:
+            P |= ((z & 0x08) >> 3) << (n >> 1)
         D |= (z & 0x1) << n
         n += 1
     S += 1
-    return S, E, F, A, K, D
+    return S, E, F, A, P, K, D
 
 
 def read_prelude_size(read_byte):
