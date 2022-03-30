@@ -431,7 +431,15 @@ def extract_prelude(bytecode, ip):
         ip2,
         ip,
         ip_ref[0],
-        (n_state, n_exc_stack, scope_flags, n_pos_args, n_posonly_args, n_kwonly_args, n_def_pos_args),
+        (
+            n_state,
+            n_exc_stack,
+            scope_flags,
+            n_pos_args,
+            n_posonly_args,
+            n_kwonly_args,
+            n_def_pos_args,
+        ),
         args,
     )
 
