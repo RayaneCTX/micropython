@@ -38,8 +38,8 @@
 //          E = n_exc_stack         number of entries in exception stack
 //          F = scope_flags         four bits of flags, MP_SCOPE_FLAG_xxx
 //          A = n_pos_args          number of arguments this function takes
-//          K = n_kwonly_args       number of keyword-only arguments this function takes
 //          P = n_posonly_args      number of positional-only arguments this function takes
+//          K = n_kwonly_args       number of keyword-only arguments this function takes
 //          D = n_def_pos_args      number of default positional arguments
 //
 //  prelude size    : var uint
