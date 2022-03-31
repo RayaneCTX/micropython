@@ -31,6 +31,10 @@
 
 #include "py/obj.h"
 
+// CHANGE (03/31/2022)
+#define MP_PARSE_PARSING_ARGLIST    (0x1)
+#define MP_PARSE_IS_PARSING_ARGLIST(meta_data) ((meta_data) & 0x1)
+
 struct _mp_lexer_t;
 
 // a mp_parse_node_t is:

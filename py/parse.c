@@ -24,6 +24,12 @@
  * THE SOFTWARE.
  */
 
+#ifdef DEBUG_PARSE
+#include "debug.h"
+#else
+#define DPRINTF(...) (void) 0
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -189,7 +195,7 @@ static const size_t FIRST_RULE_WITH_OFFSET_ABOVE_255 =
 #undef DEF_RULE_NC
 0;
 
-#if MICROPY_DEBUG_PARSE_RULE_NAME
+//#if MICROPY_DEBUG_PARSE_RULE_NAME
 // Define an array of rule names corresponding to each rule
 STATIC const char *const rule_name_table[] = {
 #define DEF_RULE(rule, comp, kind, ...) #rule,
@@ -204,7 +210,7 @@ STATIC const char *const rule_name_table[] = {
 #undef DEF_RULE
 #undef DEF_RULE_NC
 };
-#endif
+//#endif
 
 // *FORMAT-ON*
 
@@ -236,6 +242,9 @@ typedef struct _parser_t {
 
     mp_parse_tree_t tree;
     mp_parse_chunk_t *cur_chunk;
+
+    // CHANGE (03/31/2022)
+    uint32_t meta_data;
 
     #if MICROPY_COMP_CONST
     mp_map_t consts;
@@ -886,6 +895,9 @@ mp_parse_tree_t mp_parse(mp_lexer_t *lex, mp_parse_input_kind_t input_kind) {
     parser.tree.chunk = NULL;
     parser.cur_chunk = NULL;
 
+    // CHANGE (03/31/2022)
+    parser.meta_data = 0x0;
+
     #if MICROPY_COMP_CONST
     mp_map_init(&parser.consts, 0);
     #endif
@@ -922,6 +934,11 @@ mp_parse_tree_t mp_parse(mp_lexer_t *lex, mp_parse_input_kind_t input_kind) {
         const uint16_t *rule_arg = get_rule_arg(rule_id);
         size_t n = rule_act & RULE_ACT_ARG_MASK;
 
+        // CHANGE (03/31/2022)
+        if(rule_id == RULE_arglist) {
+            parser.meta_data |= MP_PARSE_PARSING_ARGLIST;
+        }
+
         #if 0
         // debugging
         printf("depth=" UINT_FMT " ", parser.rule_stack_top);
@@ -930,6 +947,23 @@ mp_parse_tree_t mp_parse(mp_lexer_t *lex, mp_parse_input_kind_t input_kind) {
         }
         printf("%s n=" UINT_FMT " i=" UINT_FMT " bt=%d\n", rule_name_table[rule_id], n, i, backtrack);
         #endif
+
+        char *rule = (char *) rule_name_table[rule_id];
+
+        char *kind;
+        switch(rule_act & RULE_ACT_KIND_MASK) {
+            case RULE_ACT_OR:
+                kind = "OR-rule";
+                break;
+            case RULE_ACT_AND:
+                kind = "AND-rule";
+                break;
+            default:
+                kind = "LIST-rule";
+                break;
+        }
+
+        DPRINTF("considering %s '%s'. n = %d, i = %d%s%s (depth: %d).\n", kind, rule, (int) n, (int) i, backtrack ? ", backtracking..." : "", (i + 1 == n) && *kind != 'L' ? " (last time)" : "", (int) parser.rule_stack_top);
 
         switch (rule_act & RULE_ACT_KIND_MASK) {
             case RULE_ACT_OR:
@@ -1082,6 +1116,13 @@ mp_parse_tree_t mp_parse(mp_lexer_t *lex, mp_parse_input_kind_t input_kind) {
                 bool had_trailing_sep;
                 if (backtrack) {
                 list_backtrack:
+
+                    // CHANGE (03/31/2022)
+                    if(rule_id == RULE_arglist) {
+                        parser.meta_data &= ~MP_PARSE_PARSING_ARGLIST;
+                        DPRINTF("done parsing argument list.\n");
+                    }
+
                     had_trailing_sep = false;
                     if (n == 2) {
                         if (i == 1) {
