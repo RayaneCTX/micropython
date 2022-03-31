@@ -244,7 +244,7 @@ typedef struct _parser_t {
     mp_parse_chunk_t *cur_chunk;
 
     // CHANGE (03/31/2022)
-    uint32_t meta_data;
+    uint32_t cur_view;
 
     #if MICROPY_COMP_CONST
     mp_map_t consts;
@@ -815,7 +815,7 @@ STATIC void push_result_rule(parser_t *parser, size_t src_line, uint8_t rule_id,
             // need to keep parenthesis for ()
         } else if (MP_PARSE_NODE_IS_STRUCT_KIND(pn, RULE_testlist_comp)) {
             // need to keep parenthesis for (a, b, ...)
-        } else if (MP_PARSE_NODE_IS_ID(pn) && parser->rule_stack[parser->rule_stack_top - 15].rule_id == RULE_arglist) {
+        } else if (MP_PARSE_NODE_IS_ID(pn) && MP_PARSE_IS_PARSING_ARGLIST(parser->cur_view)) {
             // Keep parentheses around single IDs that are function arguments
             // since they may be keyword arguments.
         } else {
@@ -896,7 +896,7 @@ mp_parse_tree_t mp_parse(mp_lexer_t *lex, mp_parse_input_kind_t input_kind) {
     parser.cur_chunk = NULL;
 
     // CHANGE (03/31/2022)
-    parser.meta_data = 0x0;
+    parser.cur_view = 0x0;
 
     #if MICROPY_COMP_CONST
     mp_map_init(&parser.consts, 0);
@@ -933,11 +933,6 @@ mp_parse_tree_t mp_parse(mp_lexer_t *lex, mp_parse_input_kind_t input_kind) {
         uint8_t rule_act = rule_act_table[rule_id];
         const uint16_t *rule_arg = get_rule_arg(rule_id);
         size_t n = rule_act & RULE_ACT_ARG_MASK;
-
-        // CHANGE (03/31/2022)
-        if(rule_id == RULE_arglist) {
-            parser.meta_data |= MP_PARSE_PARSING_ARGLIST;
-        }
 
         #if 0
         // debugging
@@ -1110,6 +1105,12 @@ mp_parse_tree_t mp_parse(mp_lexer_t *lex, mp_parse_input_kind_t input_kind) {
             default: {
                 assert((rule_act & RULE_ACT_KIND_MASK) == RULE_ACT_LIST);
 
+                // CHANGE (03/31/2022)
+                if(rule_id == RULE_arglist && !MP_PARSE_IS_PARSING_ARGLIST(parser.cur_view)) {
+                    parser.cur_view |= MP_PARSE_PARSING_ARGLIST;
+                    DPRINTF("PARSING ARGLISTt.\n");
+                }
+
                 // n=2 is: item item*
                 // n=1 is: item (sep item)*
                 // n=3 is: item (sep item)* [sep]
@@ -1119,8 +1120,8 @@ mp_parse_tree_t mp_parse(mp_lexer_t *lex, mp_parse_input_kind_t input_kind) {
 
                     // CHANGE (03/31/2022)
                     if(rule_id == RULE_arglist) {
-                        parser.meta_data &= ~MP_PARSE_PARSING_ARGLIST;
-                        DPRINTF("done parsing argument list.\n");
+                        parser.cur_view &= ~MP_PARSE_PARSING_ARGLIST;
+                        DPRINTF("DONE PARSING ARGLIST.\n");
                     }
 
                     had_trailing_sep = false;
