@@ -36,13 +36,15 @@ INC +=  -I$(TOP)
 INC += -I$(BUILD)
 
 # compiler settings
-CWARN = -Wall -Werror
+CWARN = -Wall
 CWARN += -Wextra -Wno-unused-parameter -Wpointer-arith -Wdouble-promotion -Wfloat-conversion
 CFLAGS += $(INC) $(CWARN) -std=gnu99 -DUNIX $(CFLAGS_MOD) $(COPT) -I$(VARIANT_DIR) $(CFLAGS_EXTRA)
 
 # Debugging/Optimization
 ifdef DEBUG
-COPT ?= -Og
+COPT ?= -Og -O0
+COPT += -DMICROPY_DEBUG_PARSE_RULE_NAME
+INC += -I$(TOP)/utils
 else
 COPT ?= -Os
 COPT += -DNDEBUG

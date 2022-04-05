@@ -815,7 +815,7 @@ STATIC void push_result_rule(parser_t *parser, size_t src_line, uint8_t rule_id,
             // need to keep parenthesis for ()
         } else if (MP_PARSE_NODE_IS_STRUCT_KIND(pn, RULE_testlist_comp)) {
             // need to keep parenthesis for (a, b, ...)
-        } else if (MP_PARSE_NODE_IS_ID(pn) && MP_PARSE_IS_PARSING_ARGLIST(parser->cur_view)) {
+        } else if (MP_PARSE_NODE_IS_ID(pn) && MP_PARSE_IS_PARSING_ARGLIST(parser)) {
             // Keep parentheses around single IDs that are function arguments
             // since they may be keyword arguments.
         } else {
@@ -1106,7 +1106,7 @@ mp_parse_tree_t mp_parse(mp_lexer_t *lex, mp_parse_input_kind_t input_kind) {
                 assert((rule_act & RULE_ACT_KIND_MASK) == RULE_ACT_LIST);
 
                 // CHANGE (03/31/2022)
-                if(rule_id == RULE_arglist && !MP_PARSE_IS_PARSING_ARGLIST(parser.cur_view)) {
+                if(rule_id == RULE_arglist && !MP_PARSE_IS_PARSING_ARGLIST(&parser)) {
                     parser.cur_view |= MP_PARSE_PARSING_ARGLIST;
                     DPRINTF("PARSING ARGLISTt.\n");
                 }
@@ -1259,6 +1259,10 @@ mp_parse_tree_t mp_parse(mp_lexer_t *lex, mp_parse_input_kind_t input_kind) {
 
     // we also free the lexer on behalf of the caller
     mp_lexer_free(lex);
+
+    // printf("----------------\n");
+    // mp_parse_node_print(&mp_plat_print, parser.tree.root, 0);
+    // printf("----------------\n");
 
     return parser.tree;
 }

@@ -33,7 +33,7 @@
 
 // CHANGE (03/31/2022)
 #define MP_PARSE_PARSING_ARGLIST    (0x1)
-#define MP_PARSE_IS_PARSING_ARGLIST(meta_data) ((meta_data) & MP_PARSE_PARSING_ARGLIST)
+#define MP_PARSE_IS_PARSING_ARGLIST(parser) (((parser)->cur_view) & MP_PARSE_PARSING_ARGLIST)
 
 struct _mp_lexer_t;
 
